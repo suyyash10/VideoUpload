@@ -1,4 +1,3 @@
-import streamlit as st
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
@@ -17,39 +16,34 @@ def compare_videos(video_path1, video_path2):
     cap1 = cv2.VideoCapture(video_path1)
     cap2 = cv2.VideoCapture(video_path2)
 
-    
     total_frames = min(int(cap1.get(cv2.CAP_PROP_FRAME_COUNT)), int(cap2.get(cv2.CAP_PROP_FRAME_COUNT)))
 
-    
     ssim_values = []
 
     for frame_number in range(total_frames):
-        
         ret1, frame1 = cap1.read()
         ret2, frame2 = cap2.read()
 
         if not ret1 or not ret2:
             break
 
-        
+        # Resize frames to have the same dimensions
+        frame1 = cv2.resize(frame1, (640, 480))  # Adjust dimensions as needed
+        frame2 = cv2.resize(frame2, (640, 480))  # Adjust dimensions as needed
+
         gray_frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
         gray_frame2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
 
-        
         similarity_index, _ = ssim(gray_frame1, gray_frame2, full=True)
         ssim_values.append(similarity_index)
 
-    
     cap1.release()
     cap2.release()
 
-    
     avg_ssim = np.mean(ssim_values)
 
-    
     similarity_threshold = 0.9
 
-    
     if avg_ssim > similarity_threshold:
         return "Videos are similar."
     else:
