@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 import cv2
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
+import shutil
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'upload'
@@ -11,6 +12,19 @@ app.config['ALLOWED_EXTENSIONS'] = {'mp4', 'avi', 'mkv'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+def flush_upload_folder():
+    folder_path = app.config['UPLOAD_FOLDER']
+    if os.path.exists(folder_path):
+        
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f"Error while deleting {file_path}: {e}")
 
 def compare_videos(video_path1, video_path2):
     cap1 = cv2.VideoCapture(video_path1)
@@ -77,6 +91,8 @@ def upload_files():
         video_path2 = os.path.join(app.config['UPLOAD_FOLDER'], filename2)
 
         result = compare_videos(video_path1, video_path2)
+
+        flush_upload_folder()
 
         return render_template('index.html', result=result)
 
