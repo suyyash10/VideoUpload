@@ -100,6 +100,6 @@ def upload_files():
         flash('Allowed file types are mp4, avi, mkv.')
         return redirect(request.url)
 
-# if __name__ == '__main__':
-#     app.secret_key = 'supersecretkey'
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.secret_key = 'supersecretkey'
+    app.run(debug=True)
